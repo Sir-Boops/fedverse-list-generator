@@ -1,16 +1,14 @@
 package me.boops;
 
-import java.io.BufferedReader;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
+
+import me.boops.functions.FetchRemoteContent;
+import me.boops.functions.StringArrayToList;
 
 public class Main {
 	
@@ -28,7 +26,7 @@ public class Main {
 		List<String> scanned = new ArrayList<String>();
 		
 		// Set Inital list
-		to_scan.addAll(getInstanceList(args[0]));
+		to_scan.addAll(new StringArrayToList().convert(new JSONArray(new FetchRemoteContent().fetch(args[0], "/api/v1/instance/peers"))));
 		
 		ThreadGroup scanGroup = new ThreadGroup("scanGroup");
 		while(to_scan.size() > 0) {
@@ -45,7 +43,7 @@ public class Main {
 						System.out.println("Scanning '" + url_to_scan + "'");
 						
 						try {
-							new_found.addAll(getInstanceList(url_to_scan));
+							new_found.addAll(new StringArrayToList().convert(new JSONArray(new FetchRemoteContent().fetch(url_to_scan, "/api/v1/instance/peers"))));
 						} catch (Exception e) {
 							System.out.println("Error fetching data from '" + url_to_scan + "'");
 						}
@@ -89,58 +87,5 @@ public class Main {
 			}
 		}
 		return ans;
-	}
-	
-	private static List<String> getInstanceList(String URL) throws Exception {
-		
-		URL url = new URL("https://" + URL + "/api/v1/instance/peers");
-		
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setInstanceFollowRedirects(true);
-		conn.setReadTimeout(10 * 1000);
-		conn.setConnectTimeout(10 * 1000);
-		conn.setRequestMethod("GET");
-		
-		conn.connect();
-		
-		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-		
-		StringBuilder sb = new StringBuilder();
-		String inByte;
-		while ((inByte = in.readLine()) != null) {
-			sb.append(inByte);
-		}
-		
-		List<String> ans = new ArrayList<String>();
-		JSONArray arr = new JSONArray(sb.toString());
-		
-		for(int i = 0; i < arr.length(); i++) {
-			ans.add(arr.getString(i));
-		}
-		
-		return ans;
-	}
-	
-	private static JSONObject getInstanceInfo(String URL) throws Exception {
-		
-		URL url = new URL("https://" + URL + "/api/v1/instance");
-		
-		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-		conn.setInstanceFollowRedirects(true);
-		conn.setReadTimeout(10 * 1000);
-		conn.setConnectTimeout(10 * 1000);
-		conn.setRequestMethod("GET");
-		
-		conn.connect();
-		
-		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-		
-		StringBuilder sb = new StringBuilder();
-		String inByte;
-		while ((inByte = in.readLine()) != null) {
-			sb.append(inByte);
-		}
-		
-		return new JSONObject(sb.toString());
 	}
 }
