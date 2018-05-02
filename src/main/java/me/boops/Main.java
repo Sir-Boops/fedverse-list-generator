@@ -38,14 +38,11 @@ public class Main {
 					public void run() {
 						
 						String url_to_scan = scan_url;
-						
 						List<String> new_found = new ArrayList<String>();
-						System.out.println("Scanning '" + url_to_scan + "'");
 						
 						try {
 							new_found.addAll(new StringArrayToList().convert(new JSONArray(new FetchRemoteContent().fetch(url_to_scan, "/api/v1/instance/peers"))));
 						} catch (Exception e) {
-							System.out.println("Error fetching data from '" + url_to_scan + "'");
 						}
 						
 						// Add newly found instances to the found_instances list
@@ -58,12 +55,10 @@ public class Main {
 								to_scan.add(new_found.get(i));
 							}
 						}
-						
-						System.out.println("Amount of currently know instances: " + found_instances.size());
 					}
 				}).start();
 				to_scan.remove(to_scan.get(0));
-				System.out.println("Left to scan: " + to_scan.size());
+				System.out.println("Known: " + found_instances.size() + ", Left to scan: " + to_scan.size());
 			}
 		}
 		
