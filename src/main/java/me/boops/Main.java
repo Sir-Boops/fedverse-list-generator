@@ -63,7 +63,8 @@ public class Main {
 		}
 		
 		while(scanGroup.activeCount() > 0) {
-			Thread.sleep(10);
+			System.out.println("Waiting for all threads to finish");
+			Thread.sleep(1000);
 		}
 		
 		PrintWriter file = new PrintWriter(new FileWriter("instance_list.txt"));
