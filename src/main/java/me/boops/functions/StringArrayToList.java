@@ -12,7 +12,9 @@ public class StringArrayToList {
 		List<String> ans = new ArrayList<String>();
 		
 		for(int i = 0; i < arr.length(); i++) {
-			ans.add(arr.getString(i));
+			if(arr.get(i) instanceof String) {
+				ans.add(arr.getString(i));
+			}
 		}
 		
 		return ans;
