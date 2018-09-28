@@ -28,7 +28,7 @@ public class Main {
 		
 		System.out.println("Starting with " + master_list.size() + " Instances");
 		
-		for(int i = 0; 3 > i; i++) {
+		for(int i = 0; master_list.size() > i; i++) {
 			
 			List<Object> new_list = new FetchPeersList().fetch(master_list.get(i));
 			
