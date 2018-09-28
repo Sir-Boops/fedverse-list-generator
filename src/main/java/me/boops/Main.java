@@ -1,16 +1,14 @@
 package me.boops;
 
-import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONArray;
-
-import me.boops.functions.FetchRemoteContent;
-import me.boops.functions.StringArrayToList;
+import me.boops.functions.FetchPeersList;
 
 public class Main {
+	
+	public static String http_client = "";
 	
 	public static void main(String[] args) throws Exception {
 		
@@ -19,69 +17,36 @@ public class Main {
 			System.exit(1);
 		}
 		
-		System.out.println("Using '" + args[0] + "' as the starting point");
+		System.out.println("Starting fedi scan from the list located at: " + args[0]);
 		
-		List<String> found_instances = new ArrayList<String>();
-		List<String> to_scan = new ArrayList<String>();
-		List<String> scanned = new ArrayList<String>();
+		List<Object> list = new FetchPeersList().fetch(args[0]);
+		List<String> master_list = new ArrayList<String>();
 		
-		// Set Inital list
-		to_scan.addAll(new StringArrayToList().convert(new JSONArray(new FetchRemoteContent().fetch(args[0], "/api/v1/instance/peers"))));
+		for(int i = 0; list.size() > i; i++) {
+			master_list.add(list.get(i).toString());
+		}
 		
-		ThreadGroup scanGroup = new ThreadGroup("scanGroup");
-		while(to_scan.size() > 0) {
+		System.out.println("Starting with " + master_list.size() + " Instances");
+		
+		for(int i = 0; 3 > i; i++) {
 			
-			if(scanGroup.activeCount() < 40) {
-				scanned.add(to_scan.get(0));
-				new Thread(scanGroup, new Runnable() {
-					String scan_url = to_scan.get(0);
-					public void run() {
-						
-						String url_to_scan = scan_url;
-						List<String> new_found = new ArrayList<String>();
-						
-						try {
-							new_found.addAll(new StringArrayToList().convert(new JSONArray(new FetchRemoteContent().fetch(url_to_scan, "/api/v1/instance/peers"))));
-						} catch (Exception e) {
-						}
-						
-						// Add newly found instances to the found_instances list
-						for(int i = 0; i < new_found.size(); i++) {
-							if(!listContains(found_instances, new_found.get(i))) {
-								found_instances.add(new_found.get(i));
-							}
-							
-							if(!listContains(scanned, new_found.get(i)) && !listContains(to_scan, new_found.get(i))) {
-								to_scan.add(new_found.get(i));
-							}
-						}
-					}
-				}).start();
-				to_scan.remove(to_scan.get(0));
-				System.out.println("Known: " + found_instances.size() + ", Left to scan: " + to_scan.size());
+			List<Object> new_list = new FetchPeersList().fetch(master_list.get(i));
+			
+			for(int i2 = 0; new_list.size()> i2; i2++) {
+				if(!master_list.contains((String) new_list.get(i2))) {
+					master_list.add((String) new_list.get(i2));
+				}
 			}
+			
+			System.out.println("Indexed " + new_list.size() + " From " + master_list.get(i));
+			System.out.println("Current master size: " + master_list.size());
+			
 		}
 		
-		while(scanGroup.activeCount() > 0) {
-			System.out.println("Waiting for all threads to finish");
-			Thread.sleep(1000);
+		PrintWriter out = new PrintWriter("list.txt");
+		for(int i = 0; master_list.size() > i; i++) {
+			out.println(master_list.get(i));
 		}
-		
-		PrintWriter file = new PrintWriter(new FileWriter("instance_list.txt"));
-		for(int i = 0; i < found_instances.size(); i++) {
-			file.println(found_instances.get(i));
-		}
-		file.close();
-		
-	}
-	
-	private static boolean listContains(List<String> toSearch, String term) {
-		boolean ans = false;
-		for(int i = 0;  i < toSearch.size(); i++) {
-			if(toSearch.get(i).equalsIgnoreCase(term)) {
-				ans = true;
-			}
-		}
-		return ans;
+		out.close();
 	}
 }
