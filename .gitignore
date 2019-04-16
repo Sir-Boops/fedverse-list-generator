@@ -1,8 +1,1 @@
-*.swp
-.classpath
-.project
-.settings/
-bin/
-build/
-.gradle/
-*.txt
+fedverse-list-generator
