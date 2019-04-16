@@ -60,6 +60,6 @@ func main() {
       }
     }
     fmt.Println("Current Checked instances:", len(Checked))
-    fmt.Println("Current Instances to Check:", len(ToCheck))
+    fmt.Println("Current Instances to Check:", (len(ToCheck) - i))
   }
 }
