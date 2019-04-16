@@ -27,6 +27,8 @@ func api_request(domain string) []string {
     return []string{}
   }
 
+  defer resp.Body.Close()
+
   // Make sure a 200 was returned
   if resp.StatusCode != 200 {
     return []string{}
